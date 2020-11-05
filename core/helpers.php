@@ -23,7 +23,7 @@ function redirect($path)
     header("Location: /{$path}");
 }
 
-function tree_obj($obj, $pid = 0)
+function build_tree($obj, $pid = 0)
 {
     $out = [];
     foreach ($obj as $key => $value) {
@@ -31,10 +31,11 @@ function tree_obj($obj, $pid = 0)
             $r = [
                 'name' => $value->name,
                 'id' => $value->id,
-                'pid' => $value->pid
+                'pid' => $value->pid,
+                'path' => substr($value->path,0,strlen($value->path)-1)
             ];
             unset($obj[$key]);
-            $children = tree_obj($obj, $value->id);
+            $children = build_tree($obj, $value->id);
             if (count($children) > 0) {
                 $r['children'] = $children;
             }
