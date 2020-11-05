@@ -1,9 +1,8 @@
 getRoots();
-let butDelete = document.getElementsByName("delete");
-let toggler = document.getElementsByClassName("caret");
 function createTree(obj) {
     let container = document.getElementById('list');
     container.append(createTreeDom(obj));
+    let toggler = document.getElementsByClassName("caret");
     let i;
     for (i = 0; i < toggler.length; i++) {
         toggler[i].addEventListener("click", function () {
@@ -11,6 +10,7 @@ function createTree(obj) {
             this.classList.toggle("caret-down");
         });
     }
+    let butDelete = document.getElementsByName("delete");
     let j;
     for (j = 0; j < butDelete.length; j++) {
         butDelete[j].addEventListener("click", function () {
