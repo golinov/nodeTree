@@ -1,50 +1,80 @@
+let time = 30
 getRoots();
+
+let list = $('div[id=list]');
+
+list.on('click', 'button[name=edit]', function (e) {
+    let id = e.currentTarget.id
+    let rootName = e.currentTarget.getAttribute('data-name')
+    let modal = $('#addRoot')
+    modal.find('h5').html('Edit root')
+    $('div.form-group').show()
+    modal.modal('show')
+    modal.find('input[name="name"]').val(rootName)
+    modal.find('input[name="id"]').val(id)
+    document.getElementById("form-submit").name = 'edit';
+});
+
+list.on('click', 'button[name=add]', function (e) {
+    document.getElementById("form-submit").name = 'add';
+    let id = e.currentTarget.id
+    let modal = $('#addRoot')
+    modal.find('h5').html('Create root')
+    $('div.form-group').show()
+    modal.modal('show')
+    id ? modal.find('input[name="id"]').val(id) : null;
+});
+
+list.on('click', 'button[name=delete]', function (e) {
+    document.getElementById("form-submit").name = 'delete';
+    let id = e.target.id
+    let modal = $('#addRoot')
+    modal.find('h5').html('Delete root')
+    $('div.form-group').hide()
+    $('div.confirm-deletion').show()
+    modal.find('input[name="id"]').val(id)
+    modal.modal('show')
+});
+
+list.on('click', 'span', function () {
+    this.parentElement.querySelector(".nested").classList.toggle("active");
+    this.classList.toggle("caret-down");
+});
+
 function createTree(obj) {
     let container = document.getElementById('list');
     container.append(createTreeDom(obj));
-    let toggler = document.getElementsByClassName("caret");
-    let i;
-    for (i = 0; i < toggler.length; i++) {
-        toggler[i].addEventListener("click", function () {
-            this.parentElement.querySelector(".nested").classList.toggle("active");
-            this.classList.toggle("caret-down");
-        });
-    }
-    let butDelete = document.getElementsByName("delete");
-    let j;
-    for (j = 0; j < butDelete.length; j++) {
-        butDelete[j].addEventListener("click", function () {
-            let id = $(this).data('whatever')
-            $.get(`delete/` + id, (response) => {
-                $("li[id$=" + id + "]").remove()
-            })
-        });
-    }
+
 }
 
 function createTreeDom(obj, path = null) {
     if (!obj) return;
-    let ul = render('ul')
+    let ul;
     if (path === null) {
-        ul.id = "myUl"
+        ul = create('ul', {
+            'id': 'myUL'
+        })
     } else {
-        ul.classList.add("nested"),
-            ul.id = 'ul-item-' + path
+        ul = create('ul', {
+            'id': 'ul-item-' + path,
+            'cls': true
+        })
     }
     for (let key in obj) {
-        let li = document.createElement('li');
-        li.id = 'li-item-' + obj[key].path
+        let li = create('li', obj[key].path)
         let childrenUl = createTreeDom(obj[key].children, obj[key].path);
+        create('buttons', {
+            'id': obj[key].id,
+            'li': li,
+            'name': obj[key].name
+        })
         if (childrenUl) {
-            let span = document.createElement('span');
-            span.classList.add("caret")
-            span.innerHTML = obj[key].name;
-            li.appendChild(span);
-            render('buttons', obj[key].id, li)
+            let span = create('span')
+            li.prepend(obj[key].name + ' ');
+            li.prepend(span);
             li.append(childrenUl);
         } else {
-            li.innerHTML = obj[key].name;
-            render('buttons', obj[key].id, li)
+            li.prepend(obj[key].name + ' ');
         }
         ul.append(li);
     }
@@ -55,61 +85,123 @@ function createTreeDom(obj, path = null) {
 function getRoots() {
     $.get(`getRoots`, (response) => {
         let data = JSON.parse(response)
-        console.log(data)
         createTree(data);
     })
 }
 
-$('#addRoot').on('show.bs.modal', function (event) {
-    let button = $(event.relatedTarget)
-    let pid = button.data('id')
-    console.log(pid)
-    let modal = $(this)
-    pid ? modal.find('input[name="pid"]').val(pid) : null;
-    timer(10);
+$('#addRoot').on('show.bs.modal', function () {
+    timer(time);
 })
-
-$('#form-submit').on('click', function (e) {
-    e.preventDefault();
-    $.post(`create`, $('form').serialize(), (response) => {
-        $('#addRoot').modal('hide');
-        let data = JSON.parse(response)
-        let ulPath = data.path.replace(/(.*)-.*/, "$1");
-        let ul = $("ul[id$=" + ulPath + "]");
-        let li = document.createElement('li')
-        li.id = 'li-item-'+data.path
-        let text = document.createTextNode(data.name)
-        li.appendChild(text)
-        render('buttons', data.id, li)
-        ul[0].appendChild(li)
-    }).fail(function (error) {
-        console.log(error)
-    })
-})
-
-$("#addRoot").on("hidden.bs.modal", function () {
-    clearInterval(interval);
-    $(this).find("input").val('');
-    $(this).find("span.countdown").text('10');
-});
 
 function timer(seconds) {
     interval = setInterval(function () {
         seconds--;
         $('span.countdown').text(seconds);
-        if (seconds == 0) {
+        if (seconds === 0) {
             clearInterval(interval);
             $('#addRoot').modal('toggle');
         }
     }, 1000);
 }
 
-function render(tag, params = false, li = false) {
+$("#addRoot").on("hidden.bs.modal", function () {
+    clearInterval(interval);
+    $(this).find("input").val('');
+    $(this).find("span.countdown").text(time);
+});
+
+$('#form-submit').on('click', function (e) {
+    e.preventDefault();
+    switch (e.currentTarget.name) {
+        case 'add':
+            $.post(`create`, $('form').serialize(), (response) => {
+                $('#addRoot').modal('hide');
+                let data = JSON.parse(response)
+                add(data)
+            }).fail(function (error) {
+                console.log(error)
+            })
+            break
+        case 'edit':
+            $.post(`edit`, $('form').serialize(), (response) => {
+                $('#addRoot').modal('hide');
+                let nameRoot = $('input[name=name]').val()
+                let id = $('input[name=id]').val()
+                let arr = $("li[id$=" + id + "]")[0].childNodes
+                for (const el of arr) {
+                    if (el.nodeValue) {
+                        el.nodeValue = nameRoot + ' '
+                        break
+                    }
+                }
+            }).fail(function (error) {
+                console.log(error)
+            })
+            break
+        case 'delete':
+            deleteNode($('form')[0].id.value);
+            $('#addRoot').modal('hide')
+            $('div.confirm-deletion').hide()
+            break
+    }
+})
+
+function deleteNode(id) {
+    if (id) {
+        $.get(`delete/` + id, (response) => {
+            let rmLi = $("li[id$=" + id + "]").remove()
+            let parId = rmLi[0].id.replace(/(.*)-.*/, "$1")
+            let ulId = $("ul[id$=" + parId + "]")[0];
+            (ulId && ulId.getElementsByTagName('li').length < 1)
+                ?
+                (
+                    $("li[id$=" + parId + "]")[0].getElementsByTagName('span')[0].remove(),
+                        ulId.remove()
+                )
+                : false
+        })
+    }
+}
+
+function add(data) {
+    let ulPath = data.path.replace(/(.*)-.*/, "$1");
+    let ul = data.pid ? $("ul[id$=" + ulPath + "]")[0] : $("ul[id='myUL']")[0];
+    if (!ul && data.pid) {
+        let span = create('span')
+        let parentLi = $("li[id$=" + ulPath + "]")[0];
+        parentLi.prepend(span)
+        ul = create('ul', {
+            'cls': true,
+            'id': 'ul-item-' + ulPath
+        })
+        parentLi.appendChild(ul);
+    }
+    let li = create('li', data.path)
+    let text = document.createTextNode(data.name + ' ')
+    li.appendChild(text)
+    create('buttons', {
+        'id': data.id,
+        'li': li,
+        'name': data.name
+    })
+    ul.appendChild(li)
+}
+
+function create(tag, params = false) {
     switch (tag) {
+        case 'span':
+            let span = document.createElement('span')
+            span.classList.add('caret')
+            return span
         case 'li':
-            return li
+            let li = document.createElement('li')
+            li.id = params
+            return li;
         case 'ul':
-            return document.createElement('ul')
+            let ul = document.createElement('ul')
+            params['id'] ? ul.id = params['id'] : false
+            params['cls'] ? ul.classList.add('nested') : false;
+            return ul;
         case 'buttons':
             let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
@@ -128,23 +220,27 @@ function render(tag, params = false, li = false) {
 
             let add = document.createElement('button');
             add.classList.add("custom-btn");
-            add.setAttribute("data-toggle", "modal");
-            add.setAttribute("data-target", "#addRoot");
-            add.setAttribute("data-id", params);
+            add.setAttribute("id", params['id']);
+            add.setAttribute("name", "add")
             add.append('+');
 
             let remove = document.createElement('button');
             remove.classList.add("custom-btn");
             remove.setAttribute("name", "delete")
             remove.append('-');
-            remove.setAttribute("data-whatever", params);
+            remove.setAttribute("id", params['id']);
 
             let edit = document.createElement('button');
             edit.classList.add("custom-btn");
+            edit.setAttribute("name", "edit")
+            edit.setAttribute("id", params['id'])
+            edit.setAttribute("data-name", params['name'])
             edit.appendChild(svg)
-            li.appendChild(add);
-            li.appendChild(remove);
-            li.appendChild(edit);
-            return li;
+            params['li'].appendChild(add);
+            add.insertAdjacentHTML('afterend', "&nbsp;")
+            params['li'].appendChild(remove);
+            remove.insertAdjacentHTML('afterend', "&nbsp;")
+            params['li'].appendChild(edit);
+            return params['li'];
     }
 }

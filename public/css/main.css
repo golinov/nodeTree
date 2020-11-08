@@ -5,8 +5,7 @@ ul, #myUL {
 
 /* Remove margins and padding from the parent ul */
 #myUL {
-    margin: 0;
-    padding: 0;
+    margin-top: 10px;
 }
 
 /* Style the caret/arrow */
@@ -40,4 +39,14 @@ ul, #myUL {
 
 .custom-btn {
     display: contents;
+}
+
+div#container {
+    margin-top: 20px;
+    margin-left: 10px;
+}
+
+div#list {
+    margin-top: 10px;
+    margin-left: 20px;
 }

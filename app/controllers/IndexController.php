@@ -35,4 +35,12 @@ class IndexController
         }
     }
 
+    public function edit()
+    {
+        $arr = array_filter($_POST);
+        echo json_encode($arr);
+        if(!empty($_POST['name'])) {
+            echo json_encode(IndexModel::edit($arr));
+        }
+    }
 }

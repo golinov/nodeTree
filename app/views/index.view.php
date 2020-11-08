@@ -17,11 +17,6 @@
 </head>
 <body>
 <div id="container">
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#addRoot">
-        Create root
-    </button>
-
     <!-- Modal -->
     <div class="modal fade" id="addRoot" tabindex="-1" role="dialog" aria-labelledby="addRoot" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -38,20 +33,28 @@
                             <label for="name" class="col-sm-2 col-form-label">name:</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" name="name">
-                                <input type="hidden" class="form-control" name="pid" id="pid">
                             </div>
                         </div>
+                        <div class="confirm-deletion" style="display: none">
+                            Are you sure you want to delete?
+                        </div>
+                        <input type="hidden" class="form-control" name="id">
                     </div>
                     <div class="modal-footer">
-                        <span class="countdown">10</span>
+                        <span class="countdown mr-auto">30</span>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" id="form-submit">Create</button>
+                        <button type="submit" class="btn btn-primary" id="form-submit" name="add">Submit</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <div id="list"></div>
+    <div id="list">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-outline-secondary btn-sm" name="add">
+            Create root
+        </button>
+    </div>
 </div>
 <script src="public/js/main.js">
 </script>
