@@ -11,12 +11,13 @@ class Connection
      * Create a new PDO connection.
      *
      * @param array $config
+     * @return PDO
      */
-    public static function make($config)
+    public static function make(array $config): PDO
     {
         try {
             return new PDO(
-                'mysql:host='.$config['connection'].';dbname='.$config['name'],
+                'mysql:host='.$config['host'].';dbname='.$config['name'],
                 $config['username'],
                 $config['password'],
                 $config['options']

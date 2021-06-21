@@ -57,6 +57,7 @@ class Router
      *
      * @param string $uri
      * @param string $requestType
+     * @throws Exception
      */
     public function direct($uri, $requestType)
     {

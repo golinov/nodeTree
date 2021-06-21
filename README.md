@@ -1,4 +1,6 @@
-# nodeTree
-1. composer install
-2. config.php - бд
-3. roots.sql - дамп бд
+### Installation:
+
+1. cp .env.example .env
+2. cp app/.env.example app/.env
+3. make up
+4. make migrate

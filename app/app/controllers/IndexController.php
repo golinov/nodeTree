@@ -8,7 +8,6 @@ use App\Models\IndexModel;
 
 class IndexController
 {
-
     public function index()
     {
         return view('index');
